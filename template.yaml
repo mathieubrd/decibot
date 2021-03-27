@@ -8,15 +8,71 @@ Globals:
     Timeout: 60
 
 Resources:
+  Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: deciplus-credentials
+
   Decifuck:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./decifuck
       Handler: decifuck.handler
       Runtime: python3.8
+      Policies:
+        AWSSecretsManagerGetSecretValuePolicy:
+          SecretArn: !Ref Secret
       Events:
-        Schedule:
+        ScheduleMaelle:
           Type: Schedule
           Properties:
-            Enabled: False
-            Schedule: rate(30 minutes)
+            Schedule: rate(10 minutes)
+            Input: |
+              {
+                "username": "maelle.leherisse@gmail.com",
+                "secret_name": "deciplus-credentials",
+                "wanted_slots": [
+                  { "day": "lundi", "hour": "12:15", "room": "EXTERIEUR" }
+                ]
+              }
+
+        ScheduleMathieu:
+          Type: Schedule
+          Properties:
+            Schedule: rate(10 minutes)
+            Input: |
+              {
+                "username": "maelle.leherisse@gmail.com",
+                "secret_name": "deciplus-credentials",
+                "wanted_slots": [
+                  { "day": "lundi", "hour": "12:15", "room": "EXTERIEUR" }
+                ]
+              }
+
+  Alarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Period: 43200
+      MetricName: Errors
+      Threshold: 1
+      Namespace: AWS/Lambda
+      Statistic: Average
+      TreatMissingData: notBreaching
+      OKActions:
+        - !Ref SNSTopic
+      AlarmActions:
+        - !Ref SNSTopic
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref Decifuck
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: mathieu.brochard@outlook.com
+        - Protocol: email
+          Endpoint: maelle.leherisse@gmail.com

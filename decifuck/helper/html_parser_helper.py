@@ -25,7 +25,7 @@ def get_timeslots_from_html_planning(planning_html):
         day = day_container.find(attrs={"class": "titre-jour"}).decode_contents()
         terrain_containers = day_container.findAll(attrs={"class": "terrain-container"})
         for terrain_container in terrain_containers:
-            room = terrain_container.find(attrs={"class": "titre-terrain"}).decode_contents()
+            terrain = terrain_container.find(attrs={"class": "titre-terrain"}).decode_contents()
 
             slots = parse_slots(terrain_container)
             # parse slots '0|libre|96|3||f||' to retrieve the hour and type of wod
@@ -37,8 +37,8 @@ def get_timeslots_from_html_planning(planning_html):
                     code = timeslot_data[0]
                     full = timeslot_data[1] == "complet"
                     hour = compute_timeslot_hour(int(timeslot_data[2]))
-                    type = timeslot_data[4] if timeslot_data[4] else room
-                    timeslots.append(Timeslot(code=code, full=full, hour=hour, type=type, day=day))
+                    room = timeslot_data[4] if timeslot_data[4] else terrain
+                    timeslots.append(Timeslot(code=code, full=full, hour=hour, room=room, day=day))
 
                 week_slots.append(DaySlots(day=day, slots=timeslots))
     return week_slots

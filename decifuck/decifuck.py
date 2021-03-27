@@ -1,53 +1,46 @@
+import boto3
+import base64
+import json
 import pendulum
-import requests
-import os
+from botocore.exceptions import ClientError
+from deciplus_session import DeciplusSession
+from helper.timeslot_helper import get_decimal_hour
 
-from helper.html_parser_helper import parse_html_planning, get_timeslots_from_html_planning
-from model.timeslot import Timeslot, DaySlots
+def get_deciplus_credentials(secret_name, username):
+    secrets_manager = boto3.client("secretsmanager")
+    response = secrets_manager.get_secret_value(
+        SecretId=secret_name
+    )
 
-DECIPLUS_URL = 'https://resa-crossfitsaintsimon.deciplus.pro'
-USERNAME = os.getenv("DECIPLUS_USERNAME")
-PASSWORD = os.getenv("DECIPLUS_PASSWORD")
-DECIPLUS_AUTH_PAGE = "/sp_accueil.php"
-DECIPLUS_PLANNING_PAGE = "/sp_lecons_planning.php?sport=all"
-DECIPLUS_RESERVATION_PAGE = "/sp_reserver_lecon.php?&idz=1"
-DECIPLUS_RESERVATION_ATT = "/sp_reserver_lecon_att.php"
+    secrets = json.loads(response["SecretString"])
+    usernames = secrets["usernames"].split(",")
+    passwords = secrets["passwords"].split(",")
+    credentials = [{ "username": username, "password": passwords[i] } for i, username in enumerate(usernames)]
 
-def compute_date_params(date):
-    return date.format("D/MM/YYYY")
-
-
-class DeciplusSession:
-    def __init__(self):
-        payload = {"sp_mail": USERNAME, "sp_pwd": PASSWORD}
-        response = requests.post(DECIPLUS_URL + DECIPLUS_AUTH_PAGE, params=payload)
-        self.php_sessid = response.cookies["PHPSESSID"]
-        self.cookies = dict(PHPSESSID=self.php_sessid)
-
-    def book_timeslot(self, timeslot: Timeslot):
-        booking_url = DECIPLUS_RESERVATION_ATT if timeslot.full else DECIPLUS_RESERVATION_PAGE
-        response = requests.post(DECIPLUS_URL+booking_url,
-                                 cookies=self.cookies,
-                                 data={"idr": timeslot.code,
-                                       "idz": 1,
-                                       "sport": 1,
-                                       "act": "new",
-                                       "etat_resa": "init"})
-        return response
-
-    def get_timeslots_for_week(self, date):
-        # Next week, first day of the week (monday)
-        date_params = compute_date_params(date.start_of("week"))
-        print(f"Looking for next week timeslots, starting on {date_params}")
-        response = requests.get(DECIPLUS_URL + DECIPLUS_PLANNING_PAGE, cookies=self.cookies, params={"date": date_params})
-        return get_timeslots_from_html_planning(response.content)
-
+    return list(filter(lambda cred: cred["username"] == username, credentials))[0]
 
 def handler(event, context):
-    # Looking for next week timeslots
-    next_week = pendulum.now().add(weeks=1)
-    this_week = pendulum.now()
-    session = DeciplusSession()
-    weekslots = session.get_timeslots_for_week(this_week)
-    print(weekslots)
-    print(session.book_timeslot(weekslots[0].slots[1]))
+    secret_name = event["secret_name"]
+    username = event["username"]
+    wanted_slots = event["wanted_slots"]
+    credentials = get_deciplus_credentials(secret_name, username)
+
+    session = DeciplusSession(credentials["username"], credentials["password"])
+
+    week = pendulum.now()
+    for _ in range(2):
+        day_slots = session.get_timeslots_for_week(week)
+
+        for wanted_slot in wanted_slots:
+            wanted_day = wanted_slot["day"].lower()
+            wanted_hour = get_decimal_hour(wanted_slot["hour"])
+            wanted_room = wanted_slot["room"].lower()
+
+            for day_slot in day_slots:
+                if day_slot.day == wanted_day:
+                    for slot in day_slot.slots:
+                        if slot.hour == wanted_hour and slot.room == wanted_room:
+                            session.book_timeslot(timeslot=slot)
+                            return slot.hour
+        
+        week = week.add(weeks=1)
