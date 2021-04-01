@@ -20,33 +20,19 @@ Resources:
       Handler: decifuck.handler
       Runtime: python3.8
       Policies:
-        AWSSecretsManagerGetSecretValuePolicy:
-          SecretArn: !Ref Secret
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref Secret
+        - SSMParameterReadPolicy:
+            ParameterName: !Ref WantedSlots
       Events:
-        ScheduleMaelle:
+        Schedule:
           Type: Schedule
           Properties:
             Schedule: rate(10 minutes)
             Input: |
               {
-                "username": "maelle.leherisse@gmail.com",
                 "secret_name": "deciplus-credentials",
-                "wanted_slots": [
-                  { "day": "lundi", "hour": "12:15", "room": "EXTERIEUR" }
-                ]
-              }
-
-        ScheduleMathieu:
-          Type: Schedule
-          Properties:
-            Schedule: rate(10 minutes)
-            Input: |
-              {
-                "username": "maelle.leherisse@gmail.com",
-                "secret_name": "deciplus-credentials",
-                "wanted_slots": [
-                  { "day": "lundi", "hour": "12:15", "room": "EXTERIEUR" }
-                ]
+                "wanted_slots_parameter_name": "decifuck-wanted-slots"
               }
 
   Alarm:
@@ -58,7 +44,7 @@ Resources:
       MetricName: Errors
       Threshold: 1
       Namespace: AWS/Lambda
-      Statistic: Average
+      Statistic: Maximum
       TreatMissingData: notBreaching
       OKActions:
         - !Ref SNSTopic
@@ -67,6 +53,13 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref Decifuck
+
+  WantedSlots:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: decifuck-wanted-slots
+      Type: String
+      Value: '{}'
 
   SNSTopic:
     Type: AWS::SNS::Topic

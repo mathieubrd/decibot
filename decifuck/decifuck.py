@@ -39,15 +39,20 @@ def process_day_slots(session, wanted_slot, day_slots):
                     session.book_timeslot(timeslot=slot)
 
 def handler(event, context):
+    ssm_client = boto3.client("ssm")
+
+    wanted_slots_parameter_store_name = event["wanted_slots_parameter_name"]
     secret_name = event["secret_name"]
-    username = event["username"]
-    wanted_slots = event["wanted_slots"]
-    credentials = get_deciplus_credentials(secret_name, username)
+    parameters = json.loads(ssm_client.get_parameter(Name=wanted_slots_parameter_store_name)["Parameter"]["Value"])
 
-    session = DeciplusSession(credentials["username"], credentials["password"])
+    for parameter in parameters:
+        username = parameter["username"]
+        wanted_slots = parameter["wanted_slots"]
+        credentials = get_deciplus_credentials(secret_name, username)
+        session = DeciplusSession(username=username, password=credentials["password"])
+        week = pendulum.now()
 
-    week = pendulum.now()
-    for _ in range(2):
-        week_slots = session.get_timeslots_for_week(week)
-        process_week_slots(session, week_slots, wanted_slots)
-        week = week.add(weeks=1)
+        for _ in range(2):
+            week_slots = session.get_timeslots_for_week(week)
+            process_week_slots(session, week_slots, wanted_slots)
+            week = week.add(weeks=1)
