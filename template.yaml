@@ -40,7 +40,7 @@ Resources:
     Properties:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
-      Period: 43200
+      Period: 300
       MetricName: Errors
       Threshold: 1
       Namespace: AWS/Lambda
