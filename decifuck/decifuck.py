@@ -39,7 +39,7 @@ def handler(event, context):
             for day_slot in day_slots:
                 if day_slot.day == wanted_day:
                     for slot in day_slot.slots:
-                        if slot.hour == wanted_hour and slot.room == wanted_room:
+                        if slot.hour == wanted_hour:
                             session.book_timeslot(timeslot=slot)
                             return slot.hour
         
