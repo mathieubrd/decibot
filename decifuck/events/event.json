@@ -5,7 +5,7 @@
     { "day": "lundi", "hour": "12:15", "room": "EXTERIEUR" },
     { "day": "mardi", "hour": "12:15", "room": "EXTERIEUR" },
     { "day": "mercredi", "hour": "12:15", "room": "EXTERIEUR" },
-    { "day": "jeudi", "hour": "12:15", "room": "EXTERIEUR" },
+    { "day": "jeudi", "hour": "18:00", "room": "WOD 2" },
     { "day": "vendredi", "hour": "12:15", "room": "EXTERIEUR" },
     { "day": "dimanche", "hour": "11:00", "room": "open 21.3" }
   ]
