@@ -16,6 +16,7 @@ Resources:
   Decifuck:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: decifuck
       CodeUri: ./decifuck
       Handler: decifuck.handler
       Runtime: python3.8
