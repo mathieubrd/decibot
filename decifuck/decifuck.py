@@ -30,13 +30,17 @@ def process_day_slots(session, wanted_slot, day_slots):
     wanted_room = wanted_slot["room"].lower() if "room" in wanted_slot else None
 
     if day_slots.day == wanted_day:
-        for slot in day_slots.slots:
+        slot_candidates = [slot for slot in day_slots.slots if slot.hour == wanted_hour]
+
+        if slot_candidates:
             if wanted_room:
-                if slot.hour == wanted_hour and wanted_room == slot.room:
-                    session.book_timeslot(timeslot=slot)
+                for slot_candidate in slot_candidates:
+                    if wanted_room == slot_candidate.room:
+                        session.book_timeslot(timeslot=slot_candidate)
+                    else:
+                        session.book_timeslot(timeslot=slot_candidates[0])
             else:
-                if slot.hour == wanted_hour:
-                    session.book_timeslot(timeslot=slot)
+                session.book_timeslot(timeslot=slot_candidates[0])
 
 def handler(event, context):
     ssm_client = boto3.client("ssm")
