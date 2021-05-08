@@ -1,5 +1,0 @@
-bs4
-dataclasses
-pendulum
-flake8
-requests
