@@ -3,3 +3,4 @@
 .aws-sam
 .vscode
 __pycache__
+build/
