@@ -1,0 +1,19 @@
+service: decifuck
+
+plugins:
+  - serverless-plugin-typescript
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  timeout: 30
+  region: eu-west-1
+  deploymentBucket:
+    name: mathieubrochard.serverless-deploys
+  deploymentPrefix: decifuck
+  lambdaHashingVersion: 20201221
+
+functions:
+  decifuck:
+    name: decifuck
+    handler: src/index.handler
