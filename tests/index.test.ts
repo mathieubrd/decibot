@@ -5,8 +5,6 @@ import Course from '../src/models/course'
 import { handler } from '../src/index'
 import DeciplusClient from '../src/services/deciplus'
 
-const deciplusClient = new DeciplusClient('john.doe@example.com', 'password@123')
-
 const availableCourses: Course[] = [
   {
     id: 1234,
