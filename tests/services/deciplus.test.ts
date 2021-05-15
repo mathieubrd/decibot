@@ -120,7 +120,7 @@ describe('deciplus client', () => {
   describe('book course', () => {
     test('should book a course', () => {
       client.instance.request = jest.fn().mockResolvedValue({})
-      expect(client.bookCourse(dummyCourse)).resolves.toBe(undefined)
+      expect(client.bookCourse(dummyCourse)).resolves.toBe(dummyCourse)
     })
 
     test('should fail booking course quota exceeded', () => {

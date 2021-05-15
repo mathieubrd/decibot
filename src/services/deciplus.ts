@@ -79,8 +79,9 @@ export default class DeciplusClient {
         return courses
     }
 
-    async bookCourse(course: Course): Promise<void> {
+    async bookCourse(course: Course): Promise<Course> {
         await this.request("post", `/members/v1/booking/${course.id.toString()}/addMember`)
+        return course
     }
 
     private async request(method: Method, url: string, params?: { [key: string]: string } ): Promise<AxiosResponse> {
