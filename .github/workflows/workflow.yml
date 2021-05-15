@@ -1,19 +1,28 @@
 name: Deploy Serverless
 
 on:
-  workflow_run:
-    workflows: ["tests"]
-    branches: [master]
-    types:
-      - completed
-
   push:
     branches:
       - 'master'
+  pull_request:
+    branches:
+      - '*'
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install modules
+      run: npm install
+      
+    - name: Run tests
+      run: npm t
+
   deploy:
-    name: deploy
+    if: github.ref == 'refs/heads/master'
+    needs: tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
