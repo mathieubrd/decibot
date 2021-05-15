@@ -8,7 +8,6 @@ export function getFrenchDayFromDate(date: Date): string {
 }
 
 export function getHourFromDate(date: Date): string {
-    const parisTime = utcToZonedTime(date, 'Europe/Paris')
-    const hour = format(parisTime, "kk:mm")
+    const hour = format(date, "kk:mm")
     return hour
 }
