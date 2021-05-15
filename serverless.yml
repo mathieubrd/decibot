@@ -17,3 +17,19 @@ functions:
   decifuck:
     name: decifuck
     handler: src/index.handler
+
+resources:
+  Resources:
+    wantedSlotsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: decifuck-wanted-slots
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
