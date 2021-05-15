@@ -1,6 +1,6 @@
 import { isRightHour, isRightDay, findCourses } from '../src'
 import { set } from 'date-fns'
-import WantedCourse from '../src/models/wantedCourse'
+import WantedSlot from './models/wantedSlot'
 import Course from '../src/models/course'
 import { handler } from '../src/index'
 import DeciplusClient from '../src/services/deciplus'
@@ -52,7 +52,7 @@ test('should not be the same day', () => {
 })
 
 test('should find one course', () => {
-  const wantedCourses: WantedCourse[] = [
+  const wantedCourses: WantedSlot[] = [
     {
       day: "Mercredi",
       hour: "14:00",
@@ -65,7 +65,7 @@ test('should find one course', () => {
 })
 
 test('should not find course', () => {
-  const wantedCourses: WantedCourse[] = [
+  const wantedCourses: WantedSlot[] = [
     {
       day: "Jeudi",
       hour: "14:00",

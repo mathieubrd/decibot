@@ -1,8 +1,8 @@
-type WantedCourse = {
+type WantedSlot = {
     day: string
     hour: string
     activity: string
     room: string
 }
 
-export default WantedCourse
+export default WantedSlot
