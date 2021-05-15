@@ -1,0 +1,33 @@
+name: Deploy Serverless
+
+on:
+  workflow_run:
+    workflows: ["tests"]
+    branches: [master]
+    types:
+      - completed
+
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install NodeJS
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14'
+    - run: npm ci
+    
+    - name: serverless deploy
+      uses: serverless/github-action@master
+      with:
+        args: deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
