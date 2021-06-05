@@ -12,50 +12,52 @@ const dummyCredentials = [
   }
 ] as Credentials[]
 
+const secretValue = {
+  'john.doe@example.com': 'P@ssw0rd!123',
+  'tom.scoot@dummy.com': 'N0elFl@ntier!123'
+}
+
 const unknownEmail = "delabate@oss.fr"
+const secretId = "secret-123"
 
-const ssmClientSendMock = jest.fn()
+const secretsManagerClient = jest.fn()
 
-jest.mock('@aws-sdk/client-ssm', () => {
+jest.mock('@aws-sdk/client-secrets-manager', () => {
   return {
-    SSMClient: jest.fn(() => {
+    SecretsManagerClient: jest.fn(() => {
       return {
-        send: ssmClientSendMock
+        send: secretsManagerClient
       }
     }),
-    GetParameterCommand: jest.fn()
+    GetSecretValueCommand: jest.fn()
   }
 })
 
 describe('credentials', () => {
   beforeEach(() => {
-    ssmClientSendMock.mockReset()
+    secretsManagerClient.mockReset()
   })
 
   test('should resolve to a list of all credentials', async () => {
-    ssmClientSendMock.mockResolvedValue({
-      Parameter: {
-        Value: JSON.stringify(dummyCredentials)
-      }
+    secretsManagerClient.mockResolvedValue({
+      SecretString: JSON.stringify(secretValue)
     })
 
-    expect(await getCredentials()).toEqual<Credentials[]>(dummyCredentials)
+    expect(await getCredentials(secretId)).toEqual<Credentials[]>(dummyCredentials)
   })
 
   test('should resolve to a list of credentials given by email', async () => {
-    ssmClientSendMock.mockResolvedValue({
-      Parameter: {
-        Value: JSON.stringify([dummyCredentials[0]])
-      }
+    secretsManagerClient.mockResolvedValue({
+      SecretString: JSON.stringify(secretValue)
     })
 
-    const credentials = await getCredentials(dummyCredentials[0].email)
+    const credentials = await getCredentials(secretId, dummyCredentials[0].email)
     expect(credentials).toEqual<Credentials[]>([dummyCredentials[0]])
   })
 
   test('should resolve to an empty list of credentials', async () => {
-    ssmClientSendMock.mockResolvedValue({
-      Parameter: undefined
+    secretsManagerClient.mockResolvedValue({
+      SecretString: undefined
     })
 
     const credentials = await getCredentials(unknownEmail)
@@ -63,7 +65,7 @@ describe('credentials', () => {
   })
 
   test('should reject to parameter store not found', () => {
-    expect(getCredentials()).rejects.toThrowError()
+    expect(getCredentials(secretId)).rejects.toThrowError()
   })
 
   afterAll(() => {

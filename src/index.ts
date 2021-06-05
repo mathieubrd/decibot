@@ -1,4 +1,4 @@
-import DeciplusClient from './services/deciplus'
+import DeciplusClient, { DeciplusBookingComplete } from './services/deciplus'
 import Course from './models/course'
 import { getWantedSlots } from './services/wantedSlots'
 import { getCredentials } from './services/credentials'
@@ -8,7 +8,7 @@ import endOfWeek from 'date-fns/endOfWeek'
 import { findCourses } from './helpers'
 
 export const handler = async (): Promise<void> => {
-    const credentials = await getCredentials()
+    const credentials = await getCredentials('decifuck')
 
     credentials.forEach(async ({email, password}: Credentials) => {
         const client = new DeciplusClient(email, password)
@@ -17,13 +17,13 @@ export const handler = async (): Promise<void> => {
         const wantedSlots = await getWantedSlots(email)
 
         if (wantedSlots.length) {
-            const fromDate= nextMonday(new Date())
-            const toDate = endOfWeek(fromDate)
+            const fromDate= new Date()
+            const toDate = endOfWeek(nextMonday(fromDate))
 
             const courses = await client.getCourses(fromDate, toDate)
             const wantedSlotsToBook = findCourses(courses, wantedSlots)
-            
-            await Promise.all(wantedSlotsToBook.map((course: Course): Promise<Course> => {
+
+            await Promise.all(wantedSlotsToBook.map((course: Course): Promise<Course | undefined> => {
                 return client.bookCourse(course)
             }))   
         }

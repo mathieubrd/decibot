@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.16.0",
-    "@aws-sdk/client-ssm": "^3.16.0",
+    "@aws-sdk/client-secrets-manager": "^3.18.0",
     "@aws-sdk/lib-dynamodb": "^3.16.0",
     "axios": "^0.21.1",
     "date-fns": "^2.19.0",

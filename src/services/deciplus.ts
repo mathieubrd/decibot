@@ -79,9 +79,14 @@ export default class DeciplusClient {
         return courses
     }
 
-    async bookCourse(course: Course): Promise<Course> {
-        await this.request("post", `/members/v1/booking/${course.id.toString()}/addMember`)
-        return course
+    async bookCourse(course: Course): Promise<Course | undefined> {
+        try {
+            await this.request("post", `/members/v1/booking/${course.id.toString()}/addMember`)
+        } catch (err) {
+            if (err instanceof DeciplusBookingComplete) {
+                return course
+            }
+        }
     }
 
     private async request(method: Method, url: string, params?: { [key: string]: string } ): Promise<AxiosResponse> {
@@ -115,7 +120,12 @@ export default class DeciplusClient {
             if (err.response.data.message.includes('max booking')) {
                 throw new DeciplusQuotaError(err.response.data.message)
             }
-            throw new DeciplusApiError
+
+            if (err.response.data.message.includes('complete')) {
+                throw new DeciplusBookingComplete(err.response.data.message)
+            }
+            
+            throw new DeciplusApiError(err.response.data.message)
         } else if (err.request) {
             // The request was made but no response was received
             // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
@@ -180,3 +190,12 @@ export class DeciplusApiError extends Error {
         Object.setPrototypeOf(this, DeciplusApiError.prototype)
     } 
 }
+
+export class DeciplusBookingComplete extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name= "DeciplusBookingComplete"
+        Object.setPrototypeOf(this, DeciplusApiError.prototype)
+    } 
+}
+

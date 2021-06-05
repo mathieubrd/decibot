@@ -17,6 +17,10 @@ functions:
   decifuck:
     name: decifuck
     handler: src/index.handler
+    events:
+      - schedule:
+          rate: rate(5 minutes)
+          enabled: true
 
 resources:
   Resources:
@@ -33,3 +37,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    credentialsStore:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: decifuck
