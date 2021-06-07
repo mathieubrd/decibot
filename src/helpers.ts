@@ -26,7 +26,6 @@ export function findCourses(courses: Course[], WantedSlots: WantedSlot[]): Cours
         return WantedSlots.find((WantedSlot: WantedSlot) => {
             return isRightDay(course.date, WantedSlot.day)
                 && isRightHour(course.date, WantedSlot.hour)
-                && course.room === WantedSlot.room
                 && course.activity === WantedSlot.activity
         })
     })

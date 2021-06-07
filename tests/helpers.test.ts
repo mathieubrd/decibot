@@ -92,7 +92,7 @@ describe('find courses by wanted courses', () => {
         day: "Mercredi",
         hour: "14:00",
         activity: "WOD TEENS",
-        room: ".PREAU"
+        room: "FAKE"
       }
     ]
   
@@ -105,7 +105,7 @@ describe('find courses by wanted courses', () => {
         day: "Jeudi",
         hour: "14:00",
         activity: "WOD",
-        room: ".PREAU"
+        room: "FAKE"
       }
     ]
   
