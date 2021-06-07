@@ -119,7 +119,7 @@ describe('deciplus client', () => {
 
   describe('book course', () => {
     test('should book a course', () => {
-      client.instance.request = jest.fn().mockResolvedValue({})
+      client.instance.request = jest.fn().mockResolvedValue(dummyCourse)
       expect(client.bookCourse(dummyCourse)).resolves.toBe(dummyCourse)
     })
 
@@ -135,7 +135,7 @@ describe('deciplus client', () => {
       return expect(() => client.bookCourse(dummyCourse)).rejects.toThrow(DeciplusQuotaError)
     })
 
-    test('should fail booking course already booked', () => {
+    test('should fail booking course already booked', async () => {
       client.instance.request = jest.fn().mockRejectedValue({
         response: {
           data: {
@@ -144,7 +144,7 @@ describe('deciplus client', () => {
         }
       })
 
-      return expect(() => client.bookCourse(dummyCourse)).rejects.toThrow(DeciplusAlreadyBookedError)
+      await expect(client.bookCourse(dummyCourse)).rejects.toThrow(DeciplusAlreadyBookedError)
     })
   })
 })
