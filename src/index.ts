@@ -14,7 +14,9 @@ export const handler = async (): Promise<void> => {
         const client = new DeciplusClient(email, password)
         await client.auth()
 
+        console.log('email', email);
         const wantedSlots = await getWantedSlots(email)
+        console.log('wantedSlots', wantedSlots);
 
         if (wantedSlots.length) {
             console.info(wantedSlots);
@@ -29,10 +31,22 @@ export const handler = async (): Promise<void> => {
             console.info('wantedSlotsToBook');
             console.info(wantedSlotsToBook);
 
-            const results = await Promise.all(wantedSlotsToBook.map((course: Course): Promise<Course | undefined> => {
-                return client.bookCourse(course)
+            const results = await Promise.all(wantedSlotsToBook.map((course: Course): Promise<Course | Error | undefined> => {
+                //catch errors to let all requests execute even if there is one error
+                //replace by allSettled when available
+                //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+                return client.bookCourse(course).catch(e => {
+                    console.error(e)
+                    return e;
+                });
             }))
-            console.info(`successfully booked ${results.length} courses`);
+
+            if(results) {
+                const validResults = results.filter(result => !(result instanceof Error));
+                if(validResults.length) {
+                    console.log(`successfully booked ${validResults.length} courses`);
+                }
+            }
         }
     }
 }

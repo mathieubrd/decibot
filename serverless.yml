@@ -8,7 +8,7 @@ provider:
   timeout: 30
   region: eu-west-3
   deploymentBucket:
-    name: emmanuelmarboeuf.serverless-deploys
+    name: ${env:SERVERLESS_BUCKET}
   deploymentPrefix: decifuck
   lambdaHashingVersion: 20201221
 

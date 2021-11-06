@@ -104,7 +104,6 @@ export default class DeciplusClient {
         if (err.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
-            console.error(err.response.data)
             if (err.response.data.message.includes('Authentication failed')) {
                 throw new DeciplusAuthError(err.response.data.message)
             }
@@ -126,8 +125,6 @@ export default class DeciplusClient {
             // The request was made but no response was received
             // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
             // http.ClientRequest in node.js
-            console.error(err)
-            console.error(err.request)
             throw new DeciplusRequestError(err.request)
         } else {
             // Something happened in setting up the request that triggered an Error
