@@ -2,14 +2,13 @@ service: decifuck
 
 plugins:
   - serverless-plugin-typescript
-
 provider:
   name: aws
   runtime: nodejs14.x
   timeout: 30
-  region: eu-west-1
+  region: eu-west-3
   deploymentBucket:
-    name: mathieubrochard.serverless-deploys
+    name: ${env:SERVERLESS_BUCKET}
   deploymentPrefix: decifuck
   lambdaHashingVersion: 20201221
 
@@ -19,7 +18,7 @@ functions:
     handler: src/index.handler
     events:
       - schedule:
-          rate: rate(5 minutes)
+          rate: rate(20 minutes)
           enabled: true
 
 resources:

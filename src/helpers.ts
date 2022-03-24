@@ -1,5 +1,5 @@
 import { fr } from 'date-fns/locale'
-import { format } from 'date-fns'
+import { format, utcToZonedTime } from 'date-fns-tz'
 import Course from './models/course'
 import WantedSlot from './models/wantedSlot'
 
@@ -9,7 +9,7 @@ export function getFrenchDayFromDate(date: Date): string {
 }
 
 export function getHourFromDate(date: Date): string {
-    const hour = format(date, "kk:mm")
+    const hour = format(utcToZonedTime(date, "Europe/Paris"), "kk:mm", { locale: fr })
     return hour
 }
 
